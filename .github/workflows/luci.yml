@@ -1,27 +1,28 @@
-name: Sync luci from coolsnowwolf/lede
+name: Sync Packages
 
 on:
+  push:
+    branches:
+      - main  # 修改为您要同步的分支
   workflow_dispatch:
-  #schedule:
-    #- cron: "0 0 * * 0" # 每周日午夜触发
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Sync luci
-        run: |
-          git clone --depth=1 https://github.com/linkease/nas-packages.git tmp
-          cp -r tmp/package/luci ./
-          cp -r luci $GITHUB_WORKSPACE/luci
+    - uses: actions/checkout@v2
 
-        working-directory: ${{ github.workspace }}
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v7
-        with:
-          author_name: Your Name
-          author_email: your-email@example.com
-          message: "Sync luci from coolsnowwolf/lede"
-          add: "."
+    - name: Clone nas-packages
+      run: git clone --depth=1 https://github.com/linkease/nas-packages.git tmp
+
+    - name: Copy packages
+      run: cp -r tmp/* $GITHUB_WORKSPACE/luci/
+
+    - name: Commit and push changes
+      uses: EndBug/add-and-commit@v7
+      with:
+        message: Sync nas-packages at ${{ github.sha }}
+        add: .
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
